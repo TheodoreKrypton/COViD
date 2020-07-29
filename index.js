@@ -53,8 +53,8 @@ function rleFill(startIndex, offset, h, context, params) {
 }
 
 function drawBbox(bbox, params, context) {
-  ctx.strokeStyle = "lime";
-  ctx.lineWidth = "3";
+  context.strokeStyle = "lime";
+  context.lineWidth = "3";
 
   var x = mapX(bbox[0], params);
   var y = mapY(bbox[1], params);
