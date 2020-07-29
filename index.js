@@ -114,11 +114,11 @@ function draw(annotation, image, canvas, canvasWidth, canvasHeight) {
   }
   ctx.drawImage(image, params.dx, params.dy, params.dWidth, params.dHeight);
 
-  if (annotation.segmentation) {
-    if (annotation.segmentation.bbox) {
-      drawBbox(annotation.bbox, params, ctx);
-    }
+  if (annotation.bbox) {
+    drawBbox(annotation.bbox, params, ctx);
+  }
 
+  if (annotation.segmentation) {
     if (annotation.iscrowd === 0) {
       ctx.lineWidth = "1";
       ctx.fillStyle = getRandomColor();
