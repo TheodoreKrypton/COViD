@@ -17,7 +17,7 @@
 }
   </textarea>
   <br><input type="button" value="Display"
-    onclick="drawNoncrowd(document.getElementById('image'), document.getElementById('noncrowd-url').value, JSON.parse(document.getElementById('noncrowd').value))" /><br>
+    onclick="covid.drawNoncrowd(document.getElementById('image'), document.getElementById('noncrowd-url').value, JSON.parse(document.getElementById('noncrowd').value))" /><br>
 
 
   <br>image url: <br>
@@ -35,7 +35,7 @@
   </textarea>
   <br>
   <input type="button" value="Display"
-    onclick="drawUncompressed(document.getElementById('image'), document.getElementById('uncompressed-url').value, JSON.parse(document.getElementById('uncompressed').value))" /><br>
+    onclick="covid.drawUncompressed(document.getElementById('image'), document.getElementById('uncompressed-url').value, JSON.parse(document.getElementById('uncompressed').value))" /><br>
 
   <br>image url: <br>
   <input type="text" value="https://i.imgur.com/CdVfhIB.jpg" id="compressed-url" />
@@ -51,7 +51,7 @@
 }
   </textarea>
   <br><input type="button" value="Display"
-    onclick="drawCompressed(document.getElementById('image'), document.getElementById('compressed-url').value, JSON.parse(document.getElementById('compressed').value.replace(/\\/g, '\\\\')))" /><br>
+    onclick="covid.drawCompressed(document.getElementById('image'), document.getElementById('compressed-url').value, JSON.parse(document.getElementById('compressed').value.replace(/\\/g, '\\\\')))" /><br>
 
   <canvas id="image" width="600" height="600" style="position: fixed; top: 10px; left: 500px"></canvas>
 </body>
