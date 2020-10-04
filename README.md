@@ -12,7 +12,7 @@ https://theodorekrypton.github.io/COViD/index.html
 ## Usage
 HTML
 ```html
-<script src="https://raw.githubusercontent.com/TheodoreKrypton/COViD/master/index.js">
+<script src="https://unpkg.com/kovid/index.js">
 <canvas id="image" width="600" height="600"></canvas>
 ```
 
