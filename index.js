@@ -24,6 +24,30 @@ function mapXY(x, y, params) {
   return [mapX(x, params), mapY(y, params)];
 }
 
+function getResizeParams(canvas, { height, width }) {
+  var params = {
+    h: height,
+    w: width,
+  };
+
+  if (params.h > params.w) {
+    params.ratio = canvas.height / params.h;
+    params.dHeight = canvas.height;
+    params.dWidth = Math.floor(params.ratio * params.w);
+    params.dy = 0;
+    params.dx = Math.floor((canvas.width - params.dWidth) / 2);
+  } else {
+    params.ratio = canvas.width / params.w;
+    params.dWidth = canvas.width;
+    params.dHeight = Math.floor(params.ratio * params.h);
+    params.dx = 0;
+    params.dy = Math.floor((canvas.height - params.dHeight) / 2);
+  }
+
+  return params;
+};
+
+
 function rleFill(startIndex, offset, h, context, params) {
   var xy = indexToXY(startIndex, h);
   var x1 = xy[0];
@@ -53,9 +77,6 @@ function rleFill(startIndex, offset, h, context, params) {
 }
 
 function drawBbox(bbox, params, context) {
-  context.strokeStyle = "lime";
-  context.lineWidth = "3";
-
   var x = mapX(bbox[0], params);
   var y = mapY(bbox[1], params);
   var width = bbox[2] * params.ratio;
@@ -77,44 +98,27 @@ function drawPolygon(polygon, params, context) {
   context.fill(region);
 }
 
-function drawRLE(rle, h, params, context) {
+function drawRLE(rle, params, context) {
   context.beginPath();
-  context.moveTo(...mapXY(...indexToXY(rle[0], h), params));
+  context.moveTo(...mapXY(...indexToXY(rle[0], params.h), params));
   var offset = rle[0];
   for (var i = 1; i < rle.length; i += 2) {
-    rleFill(offset, rle[i], h, context, params);
+    rleFill(offset, rle[i], params.h, context, params);
     offset += rle[i] + rle[i + 1];
   }
-  rleFill(offset, rle[rle.length - 1], h, context, params);
+  rleFill(offset, rle[rle.length - 1], params.h, context, params);
   context.stroke();
 }
 
-function draw(annotation, image, canvas, canvasWidth, canvasHeight) {
+function draw(canvas, image, annotation) {
   var ctx = canvas.getContext('2d');
 
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-
-  var h = image.height;
-  var w = image.width;
-
-  var params = {}
-  if (h > w) {
-    params.ratio = canvasHeight / h;
-    params.dHeight = canvasHeight;
-    params.dWidth = Math.floor(params.ratio * w);
-    params.dy = 0;
-    params.dx = Math.floor((canvasWidth - params.dWidth) / 2);
-  } else {
-    params.ratio = canvasWidth / w;
-    params.dWidth = canvasWidth;
-    params.dHeight = Math.floor(params.ratio * h);
-    params.dx = 0;
-    params.dy = Math.floor((canvasHeight - params.dHeight) / 2);
-  }
+  var params = getResizeParams(canvas, image);
   ctx.drawImage(image, params.dx, params.dy, params.dWidth, params.dHeight);
 
   if (annotation.bbox) {
+    ctx.strokeStyle = "lime";
+    ctx.lineWidth = "3";
     drawBbox(annotation.bbox, params, ctx);
   }
 
@@ -127,20 +131,65 @@ function draw(annotation, image, canvas, canvasWidth, canvasHeight) {
       }
     } else {
       ctx.strokeStyle = getRandomColor();
-      drawRLE(annotation.segmentation.counts, h, params, ctx)
+      drawRLE(annotation.segmentation.counts, params, ctx)
     }
   }
 }
 
-function display(tag, url, ann, maxWidth, maxHeight) {
+function uncompressRLE(rle) {
+  let m = 0;
+  let p = 0;
+  let k = 0;
+  let x = 0;
+  let more = true;
+  let cnts = new Uint32Array(rle.length);
+
+  while (rle[p]) {
+    x = 0;
+    k = 0;
+    more = true;
+    while (more) {
+      let c = rle.charCodeAt(p) - 48;
+      x |= (c & 0x1F) << 5 * k;
+      more = c & 0x20;
+      p++;
+      k++;
+      if (!more && (c & 0x10)) {
+        x |= -1 << 5 * k;
+      }
+    }
+    if (m > 2) {
+      x += cnts[m - 2];
+    }
+    cnts[m++] = x;
+  }
+  return cnts;
+}
+
+function drawNoncrowd(canvas, url, ann) {
   const image = document.createElement("img");
-  const canvas = document.createElement("canvas");
-  tag.appendChild(image);
-  tag.appendChild(canvas);
-  console.log(tag.innerHTML);
   image.style.display = "none";
   image.onload = function (e) {
-    draw(ann, image, canvas, maxWidth, maxHeight);
+    draw(canvas, image, ann);
+  }
+  image.src = url;
+}
+
+function drawUncompressed(canvas, url, ann) {
+  const image = document.createElement("img");
+  image.style.display = "none";
+  image.onload = function (e) {
+    draw(canvas, image, ann);
+  }
+  image.src = url;
+}
+
+function drawCompressed(canvas, url, ann) {
+  const image = document.createElement("img");
+  image.style.display = "none";
+  image.onload = function (e) {
+    ann.segmentation.counts = uncompressRLE(ann.segmentation.counts);
+    draw(canvas, image, ann);
   }
   image.src = url;
 }
