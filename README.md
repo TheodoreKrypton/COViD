@@ -1,6 +1,10 @@
 # COViD
 COCO Visual Demonstrator - Web frontend visualizer for COCO format annotations
 
+Supported annotation types:
+  * COCO noncrowd (polygons)                    `covid.drawNoncrowd`
+  * COCO crowd (compressed/uncompressed RLE)    `covid.drawCompressed` & `covid.drawUncompressed`
+
 ## DEMO
 https://theodorekrypton.github.io/COViD/index.html
 
