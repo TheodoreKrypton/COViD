@@ -1,5 +1,5 @@
 {
-  "name": "covid",
+  "name": "kovid",
   "version": "1.0.0",
   "description": "Web frontend visualizer for COCO format annotations",
   "main": "index.js",
